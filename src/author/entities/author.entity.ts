@@ -5,12 +5,12 @@ export class Author {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  artistName: string;
 
   @Column()
-  author: string;
+  artistPhoto: string;
 
-
-
-
-
+  @Column()
+  artistBiography: string;
 }
