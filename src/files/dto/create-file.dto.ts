@@ -7,9 +7,14 @@ export class CreateFileDto {
   @IsNotEmpty()
   fileName: string;
 
-  // @IsUrl()
-
   @IsString()
   @IsNotEmpty()
   url: string;
+
+  @IsString()
+  key: string;
+
+  @IsString()
+  bucket: string;
+
 }

@@ -14,18 +14,19 @@ export class Files {
     private readonly S3service: S3Service,
   ) {}
 
-  async create(file: Express.Multer.File) {
-    // const buffer = file.buffer;
-    //
-    // const fileName = file.originalname.replace(/\.png$/i, '');
-    //
-    const result = await this.S3service.upload(file);
+  async create(
+    fileName: string,
+    fileKey: string,
+    fileLocation: string,
+    fileBucket: string,
+  ) {
+    const newFile =  new FileEntity();
+    newFile.fileName = fileName;
+    newFile.url = fileLocation;
+    newFile.key = fileKey;
+    newFile.bucket = fileBucket;
 
-    if (!result) {
-      throw new HttpException('Failed to upload into the base', 500);
-    }
-    console.log(result)
-    return file;
+    return this.repository.save(newFile);
   }
 
   async findAll() {

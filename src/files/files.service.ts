@@ -4,15 +4,17 @@ import { UpdateFileDto } from './dto/update-file.dto';
 import { Files } from './files.repository';
 import { S3Service } from '../aws/services/s3.service';
 
-
 @Injectable()
 export class FilesService {
-  constructor(private readonly filesRepo: Files) {}
+  constructor(
+    private readonly filesRepo: Files,
+    private readonly s3service: S3Service,
+  ) {}
 
   async create(file: Express.Multer.File) {
     const fileName = file.originalname.replace(/\.png$/i, '');
     const buffer = file.buffer;
-    const result = await this.S3Service.upload(file);
+    const result = await this.s3service.upload(file);
 
     if (!result) {
       throw new HttpException('Failed to upload into the base', 500);
@@ -25,7 +27,12 @@ export class FilesService {
       throw new HttpException('Failed to upload into the base', 500);
     }
 
-    return this.filesRepo.create(file);
+    const fileLocation = result.Location;
+    const fileKey = result.Key;
+    const fileBucket = result.Bucket;
+
+    console.log(result);
+    return this.filesRepo.create(fileName, fileKey, fileLocation, fileBucket);
   }
 
   findAll() {

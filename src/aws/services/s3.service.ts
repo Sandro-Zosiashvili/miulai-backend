@@ -17,7 +17,7 @@ export class S3Service {
   async upload(file: Express.Multer.File) {
     const params = {
       Bucket: 'miulai-music',
-      Key: String(file.filename),
+      Key: String(file.originalname),
       Body: file.buffer,
       ContentType: file.mimetype,
       ContentDisposition: 'inline',
@@ -27,8 +27,9 @@ export class S3Service {
     };
 
     try {
+      console.log(file.originalname, "esari namee")
       return await this.s3.upload(params).promise();
-    } catch (e) {
+    } catch {
       throw new HttpException('Failed to upload file to S3', 500);
     }
   }
