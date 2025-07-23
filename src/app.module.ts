@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthorModule } from './author/author.module';
+import { FilesModule } from './files/files.module';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -14,9 +16,11 @@ import { AuthorModule } from './author/author.module';
       password: '',
       database: 'miulai-backend-base',
       autoLoadEntities: true,
-      synchronize: true, // dev რეჟიმში OK, პროდაქშენში — არა!
+      synchronize: true,
     }),
     AuthorModule,
+    FilesModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

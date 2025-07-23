@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { AuthorRepository } from './author.repository';
 
 @Injectable()
 export class AuthorService {
+  constructor(private readonly authorRepository: AuthorRepository) {}
+
   create(createAuthorDto: CreateAuthorDto) {
-    return 'This action adds a new author';
+    return this.authorRepository.create(createAuthorDto);
   }
 
   findAll() {
-    return `This action returns all author`;
+    return this.authorRepository.findAll();
   }
 
   findOne(id: number) {
