@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { AuthorRepository } from './author.repository';
+import { S3Service } from '../aws/services/s3.service';
 
 @Injectable()
 export class AuthorService {
-  constructor(private readonly authorRepository: AuthorRepository) {}
+  constructor(
+    private readonly authorRepository: AuthorRepository,
+    private readonly s3service: S3Service,
+  ) {}
 
-  create(createAuthorDto: CreateAuthorDto) {
-    return this.authorRepository.create(createAuthorDto);
+  async create(createAuthorDto: CreateAuthorDto, file: Express.Multer.File) {
+    return this.authorRepository.create(createAuthorDto, file);
   }
 
   findAll() {

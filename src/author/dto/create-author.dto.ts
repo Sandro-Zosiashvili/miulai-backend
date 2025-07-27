@@ -9,9 +9,5 @@ export class CreateAuthorDto {
 
   @IsString()
   @IsNotEmpty()
-  artistPhoto: string;
-
-  @IsString()
-  @IsNotEmpty()
   artistBiography: string;
 }
