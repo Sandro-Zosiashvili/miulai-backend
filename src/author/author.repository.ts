@@ -4,6 +4,7 @@ import { Author } from './entities/author.entity';
 import { Repository } from 'typeorm';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { S3Service } from '../aws/services/s3.service';
+import { Album } from '../album/entities/album.entity';
 
 @Injectable()
 export class AuthorRepository {
@@ -11,31 +12,123 @@ export class AuthorRepository {
     @InjectRepository(Author)
     private readonly repository: Repository<Author>,
     private readonly s3service: S3Service,
-  ) {
-  }
+  ) {}
 
   async create(data: CreateAuthorDto, file: Express.Multer.File) {
     const result = await this.s3service.upload(file);
-
     if (!result) {
       throw new HttpException('Failed to upload into the base', 500);
     }
+
     const newAuthor = this.repository.create({
       artistName: data.artistName,
       artistBiography: data.artistBiography,
       artistPhoto: result.Location,
+      imageKey: result.Key,
     });
     return await this.repository.save(newAuthor);
   }
 
+  async findOne(id: number) {
+    const author = await this.repository.findOne({
+      where: { id },
+      relations: ['albums'],
+    });
 
-  async findById(id: string): Promise<Author> {
-      
+    if (!author) {
+      throw new HttpException('Author not found', 404);
+    }
 
-      return
+    if (author.imageKey) {
+      author.artistPhoto = await this.s3service.getPresignedUrl(
+        author.imageKey,
+      );
+    }
+
+    if (author.albums && author.albums.length > 0) {
+      author.albums = await Promise.all(
+        author.albums.map(async (album) => {
+          if (album.imageKey) {
+            album.albumImage = await this.s3service.getPresignedUrl(
+              album.imageKey,
+            );
+          }
+          return album;
+        }),
+      );
+    }
+    return author;
   }
 
   async findAll() {
-    return await this.repository.find();
+    const authors = await this.repository.find({
+      relations: ['albums'],
+    });
+
+    if (!authors || authors.length === 0) {
+      throw new HttpException('No authors found', 404);
+    }
+
+    const processedAuthors = await Promise.all(
+      authors.map(async (author) => {
+        if (author.imageKey) {
+          author.artistPhoto = await this.s3service.getPresignedUrl(
+            author.imageKey,
+          );
+        }
+
+        if (author.albums && author.albums.length > 0) {
+          author.albums = await Promise.all(
+            author.albums.map(async (album) => {
+              if (album.imageKey) {
+                album.albumImage = await this.s3service.getPresignedUrl(
+                  album.imageKey,
+                );
+              }
+              return album;
+            }),
+          );
+        }
+
+        return author;
+      }),
+    );
+    return processedAuthors;
+  }
+
+  async remove(id: number) {
+    return this.repository.manager.transaction(
+      async (transactionalEntityManager) => {
+        // 1. Find author with albums
+        const author = await transactionalEntityManager.findOne(Author, {
+          where: { id },
+          relations: ['albums'],
+        });
+
+        if (!author) {
+          throw new HttpException('Author not found', 404);
+        }
+
+        // 2. Delete all S3 files first
+        if (author.imageKey) await this.s3service.deleteFile(author.imageKey);
+        await Promise.all(
+          author.albums?.map((album) =>
+            album.imageKey
+              ? this.s3service.deleteFile(album.imageKey)
+              : Promise.resolve(),
+          ) || [],
+        );
+
+        // 3. Delete all albums (removes foreign key constraint)
+        if (author.albums?.length) {
+          await transactionalEntityManager.remove(Album, author.albums);
+        }
+
+        // 4. Now safely delete the author
+        await transactionalEntityManager.remove(Author, author);
+
+        return { success: true, message: 'Author and albums deleted' };
+      },
+    );
   }
 }

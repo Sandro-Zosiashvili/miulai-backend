@@ -1,34 +1,39 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  OneToMany,
 } from 'typeorm';
-import { Album } from '../../album/entities/album.entity';
+import { Author } from '../../author/entities/author.entity';
 
 @Entity()
-export class Author {
+export class Album {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'int', nullable: false })
+  authorId: number;
+
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  albumName: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   artistName: string;
 
-  // @Column({ type: 'varchar', length: 100, nullable: false })
   @Column({ type: 'text', nullable: false })
-  artistPhoto: string;
-
-  @Column({ type: 'varchar', length: 700, nullable: false })
-  artistBiography: string;
+  albumImage: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   imageKey: string;
 
-  @OneToMany(() => Album, (album) => album.author, { cascade: true })
-  albums: Album[];
+  @ManyToOne(() => Author, (author) => author.albums)
+  author: Author;
+
+  @Column({ type: 'date', nullable: false })
+  releaseDate: Date;
 
   @CreateDateColumn()
   createdAt: Date;

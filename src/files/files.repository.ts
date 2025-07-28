@@ -20,7 +20,7 @@ export class Files {
     fileLocation: string,
     fileBucket: string,
   ) {
-    const newFile =  new FileEntity();
+    const newFile = new FileEntity();
     newFile.fileName = fileName;
     newFile.url = fileLocation;
     newFile.key = fileKey;

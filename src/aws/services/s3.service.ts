@@ -27,10 +27,39 @@ export class S3Service {
     };
 
     try {
-      console.log(file.originalname, "esari namee")
       return await this.s3.upload(params).promise();
     } catch {
       throw new HttpException('Failed to upload file to S3', 500);
+    }
+  }
+
+  async getPresignedUrl(key: string) {
+    const params = {
+      Bucket: 'miulai-music', // Bucket-ის სახელი
+      Key: key, // ფაილის სახელი (Key) S3-ზე
+      Expires: 3600, // URL-ის ვადა (წამებში)
+    };
+    try {
+      return await this.s3.getSignedUrlPromise('getObject', params);
+    } catch {
+      console.log(key, 'modis modisedvefdvdf ');
+
+      throw new HttpException('Failed to generate presigned URL', 500);
+    }
+  }
+
+  async deleteFile(key: string): Promise<boolean> {
+    try {
+      await this.s3
+        .deleteObject({
+          Bucket: 'miulai-music',
+          Key: key,
+        })
+        .promise();
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete file ${key}:`, error);
+      return false;
     }
   }
 }

@@ -21,6 +21,7 @@ export class FilesController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   create(@UploadedFile() file: Express.Multer.File) {
+    console.log(file, 'ageraa');
     return this.filesService.create(file);
   }
 

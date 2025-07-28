@@ -21,8 +21,8 @@ export class AuthorController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   create(
-    @UploadedFile() file: Express.Multer.File,
     @Body() createAuthorDto: CreateAuthorDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.authorService.create(createAuthorDto, file);
   }

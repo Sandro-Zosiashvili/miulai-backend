@@ -20,7 +20,7 @@ export class AuthorService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} author`;
+    return this.authorRepository.findOne(id);
   }
 
   update(id: number, updateAuthorDto: UpdateAuthorDto) {
@@ -28,6 +28,6 @@ export class AuthorService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} author`;
+    return this.authorRepository.remove(id);
   }
 }

@@ -6,6 +6,8 @@ import { AuthorModule } from './author/author.module';
 import { FilesModule } from './files/files.module';
 import { AwsModule } from './aws/aws.module';
 import { ConfigModule } from '@nestjs/config';
+import { AlbumModule } from './album/album.module';
+import { MusicModule } from './music/music.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ConfigModule } from '@nestjs/config';
     AuthorModule,
     FilesModule,
     AwsModule,
+    AlbumModule,
+    MusicModule,
   ],
   controllers: [AppController],
   providers: [AppService],
