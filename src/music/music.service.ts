@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMusicDto } from './dto/create-music.dto';
 import { UpdateMusicDto } from './dto/update-music.dto';
+import { MusicRepository } from './music.repository';
 
 @Injectable()
 export class MusicService {
-  create(createMusicDto: CreateMusicDto) {
-    return 'This action adds a new music';
+  constructor(private readonly musicRepository: MusicRepository) {}
+
+  create(createMusicDto: CreateMusicDto, file: Express.Multer.File) {
+    return this.musicRepository.create(createMusicDto, file);
   }
 
   findAll() {
-    return `This action returns all music`;
+    return this.musicRepository.findAll();
   }
 
   findOne(id: number) {

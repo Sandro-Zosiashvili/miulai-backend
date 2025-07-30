@@ -29,7 +29,10 @@ export class AlbumRepository {
   }
 
   async findOne(id: number) {
-    const album = await this.repository.findOne({ where: { id } });
+    const album = await this.repository.findOne({
+      where: { id },
+      relations: ['author', 'musics'],
+    });
 
     if (!album) {
       throw new HttpException('Failed to get author', 500);
@@ -43,7 +46,7 @@ export class AlbumRepository {
   async findAll() {
     // 1. Get all authors from repository
     const albums = await this.repository.find({
-      relations: ['author'],
+      relations: ['author', 'musics'],
     });
 
     if (!albums || albums.length === 0) {

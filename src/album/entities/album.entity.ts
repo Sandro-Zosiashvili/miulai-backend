@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Author } from '../../author/entities/author.entity';
+import { Music } from '../../music/entities/music.entity';
 
 @Entity()
 export class Album {
@@ -31,6 +33,9 @@ export class Album {
 
   @ManyToOne(() => Author, (author) => author.albums)
   author: Author;
+
+  @OneToMany(() => Music, (music) => music.album)
+  musics: Music[];
 
   @Column({ type: 'date', nullable: false })
   releaseDate: Date;
