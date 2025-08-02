@@ -4,6 +4,7 @@ import { Album } from './entities/album.entity';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { Repository } from 'typeorm';
 import { S3Service } from '../aws/services/s3.service';
+import { Music } from '../music/entities/music.entity';
 
 @Injectable()
 export class AlbumRepository {
@@ -68,5 +69,58 @@ export class AlbumRepository {
 
     // 3. Return the modified list
     return authorsWithPresignedUrls;
+  }
+
+  async remove(id: number): Promise<void> {
+    // 1. ვიპოვოთ ალბომი მისი მუსიკებით
+    const album = await this.repository.findOne({
+      where: { id },
+      relations: ['musics'],
+    });
+
+    if (!album) {
+      throw new HttpException('ალბომი ვერ მოიძებნა', 404);
+    }
+
+    // 2. წავშალოთ ყველა მუსიკის ფაილები AWS S3-დან
+    if (album.musics && album.musics.length > 0) {
+      for (const music of album.musics) {
+        if (music.imageKey) {
+          await this.s3service
+            .deleteFile(music.imageKey)
+            .catch((e) =>
+              console.error(`ფაილის წაშლის შეცდომა ${music.imageKey}:`, e),
+            );
+        }
+        if (music.imageKey) {
+          // თუ მუსიკას აქვს ცალკე ფაილის გასაღები
+          await this.s3service
+            .deleteFile(music.imageKey)
+            .catch((e) =>
+              console.error(
+                `მუსიკის ფაილის წაშლის შეცდომა ${music.imageKey}:`,
+                e,
+              ),
+            );
+        }
+      }
+    }
+
+    // 3. წავშალოთ ალბომის ფოტო AWS S3-დან
+    if (album.imageKey) {
+      await this.s3service
+        .deleteFile(album.imageKey)
+        .catch((e) =>
+          console.error(`ალბომის ფოტოს წაშლის შეცდომა ${album.imageKey}:`, e),
+        );
+    }
+
+    // 4. წავშალოთ ყველა მუსიკა ბაზიდან (თუ კასკადი არ მუშაობს)
+    if (album.musics && album.musics.length > 0) {
+      await this.repository.manager.remove(album.musics);
+    }
+
+    // 5. წავშალოთ თავად ალბომი ბაზიდან
+    await this.repository.remove(album);
   }
 }

@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { S3Service } from '../aws/services/s3.service';
 import { Album } from '../album/entities/album.entity';
+import { Music } from '../music/entities/music.entity';
 
 @Injectable()
 export class AuthorRepository {
@@ -12,11 +13,22 @@ export class AuthorRepository {
     @InjectRepository(Author)
     private readonly repository: Repository<Author>,
     private readonly s3service: S3Service,
+    @InjectRepository(Music)
+    private readonly musicRepository: Repository<Music>,
   ) {}
 
-  async create(data: CreateAuthorDto, file: Express.Multer.File) {
+  async create(
+    data: CreateAuthorDto,
+    file: Express.Multer.File,
+    coverFile: Express.Multer.File,
+  ) {
     const result = await this.s3service.upload(file);
+    const resultTwo = await this.s3service.upload(coverFile);
+
     if (!result) {
+      throw new HttpException('Failed to upload into the base', 500);
+    }
+    if (!resultTwo) {
       throw new HttpException('Failed to upload into the base', 500);
     }
 
@@ -25,6 +37,8 @@ export class AuthorRepository {
       artistBiography: data.artistBiography,
       artistPhoto: result.Location,
       imageKey: result.Key,
+      artistCover: resultTwo.Location,
+      artistCoverKey: resultTwo.Key,
     });
     return await this.repository.save(newAuthor);
   }
@@ -42,6 +56,12 @@ export class AuthorRepository {
     if (author.imageKey) {
       author.artistPhoto = await this.s3service.getPresignedUrl(
         author.imageKey,
+      );
+    }
+
+    if (author.artistCoverKey) {
+      author.artistCover = await this.s3service.getPresignedUrl(
+        author.artistCoverKey,
       );
     }
 
@@ -74,6 +94,12 @@ export class AuthorRepository {
         if (author.imageKey) {
           author.artistPhoto = await this.s3service.getPresignedUrl(
             author.imageKey,
+          );
+        }
+
+        if (author.artistCoverKey) {
+          author.artistCover = await this.s3service.getPresignedUrl(
+            author.artistCoverKey,
           );
         }
 
@@ -130,5 +156,30 @@ export class AuthorRepository {
         return { success: true, message: 'Author and albums deleted' };
       },
     );
+  }
+
+  async getTopSongs(authorId: number, limit: number = 10): Promise<Music[]> {
+    // 1. მივიღოთ მუსიკები ალბომებთან ერთად
+    const songs = await this.musicRepository
+      .createQueryBuilder('music')
+      .innerJoinAndSelect('music.album', 'album')
+      .where('album.authorId = :authorId', { authorId })
+      .orderBy('music.playCount', 'DESC')
+      .take(limit)
+      .getMany();
+
+    // 2. გენერირება პრესაინდირებული URL-ების ალბომების სურათებისთვის
+    await Promise.all(
+      songs.map(async (song) => {
+        if (song.album?.imageKey) {
+          song.album.albumImage = await this.s3service.getPresignedUrl(
+            song.album.imageKey,
+          );
+        }
+        return song;
+      }),
+    );
+
+    return songs;
   }
 }

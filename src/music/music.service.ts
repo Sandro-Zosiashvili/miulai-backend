@@ -16,7 +16,7 @@ export class MusicService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} music`;
+    return this.musicRepository.findOne(id);
   }
 
   update(id: number, updateMusicDto: UpdateMusicDto) {
@@ -24,6 +24,10 @@ export class MusicService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} music`;
+    return this.musicRepository.remove(id);
+  }
+
+  topSongs(limit: number) {
+    return this.musicRepository.topSongs(limit);
   }
 }

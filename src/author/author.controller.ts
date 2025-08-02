@@ -8,23 +8,38 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
+
 
 @Controller('author')
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'photo' }, { name: 'cover' }]),
+  )
   create(
     @Body() createAuthorDto: CreateAuthorDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles()
+    files: { photo?: Express.Multer.File[]; cover?: Express.Multer.File[] },
   ) {
-    return this.authorService.create(createAuthorDto, file);
+    const photo = files.photo?.[0]; // პირველი ფაილი photo სახელით
+    const cover = files.cover?.[0]; // პირველი ფაილი cover სახელით
+
+    console.log(photo, cover);
+    if (!photo) throw new Error('Photo is required');
+    if (!cover) throw new Error('Cover is required');
+
+    return this.authorService.create(createAuthorDto, photo, cover);
   }
 
   @Get()
@@ -45,5 +60,10 @@ export class AuthorController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.authorService.remove(+id);
+  }
+
+  @Get(':id/top-songs')
+  getTopSongs(@Param('id') authorId: number) {
+    return this.authorService.getTopSongs(authorId);
   }
 }

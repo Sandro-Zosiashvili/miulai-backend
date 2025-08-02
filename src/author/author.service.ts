@@ -11,8 +11,12 @@ export class AuthorService {
     private readonly s3service: S3Service,
   ) {}
 
-  async create(createAuthorDto: CreateAuthorDto, file: Express.Multer.File) {
-    return this.authorRepository.create(createAuthorDto, file);
+  async create(
+    createAuthorDto: CreateAuthorDto,
+    photo: Express.Multer.File,
+    cover: Express.Multer.File,
+  ) {
+    return this.authorRepository.create(createAuthorDto, photo, cover);
   }
 
   findAll() {
@@ -29,5 +33,9 @@ export class AuthorService {
 
   remove(id: number) {
     return this.authorRepository.remove(id);
+  }
+
+  getTopSongs(authorId: number) {
+    return this.authorRepository.getTopSongs(authorId);
   }
 }

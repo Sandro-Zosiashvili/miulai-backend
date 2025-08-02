@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { MusicService } from './music.service';
 import { CreateMusicDto } from './dto/create-music.dto';
@@ -25,6 +26,11 @@ export class MusicController {
     @Body() createMusicDto: CreateMusicDto,
   ) {
     return this.musicService.create(createMusicDto, file);
+  }
+
+  @Get('top-songs')
+  topSongs(@Query('limit') limit: number) {
+    return this.musicService.topSongs(limit);
   }
 
   @Get()

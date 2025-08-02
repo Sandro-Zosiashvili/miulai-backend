@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Album } from '../../album/entities/album.entity';
+import { Author } from '../../author/entities/author.entity';
 
 @Entity()
 export class Music {
@@ -43,8 +44,14 @@ export class Music {
   @JoinColumn({ name: 'albumId' })
   album: Album;
 
+  @ManyToOne(() => Author, (author) => author.musics)
+  author: Author;
+
   @Column({ nullable: true })
   duration: number;
+
+  @Column({ type: 'int', nullable: true })
+  playCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

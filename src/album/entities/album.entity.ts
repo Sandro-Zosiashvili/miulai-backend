@@ -34,7 +34,10 @@ export class Album {
   @ManyToOne(() => Author, (author) => author.albums)
   author: Author;
 
-  @OneToMany(() => Music, (music) => music.album)
+  @OneToMany(() => Music, (music) => music.album, {
+    cascade: true, // ავტომატურად წაშლის დაკავშირებულ მუსიკას
+    onDelete: 'CASCADE',
+  })
   musics: Music[];
 
   @Column({ type: 'date', nullable: false })
