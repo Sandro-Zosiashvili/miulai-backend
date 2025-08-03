@@ -29,6 +29,7 @@ export class S3Service {
     try {
       return await this.s3.upload(params).promise();
     } catch {
+      console.log(process.env.AWS_ACCESS_KEY);
       throw new HttpException('Failed to upload file to S3', 500);
     }
   }
