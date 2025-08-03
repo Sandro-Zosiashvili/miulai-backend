@@ -14,13 +14,16 @@ import { MusicModule } from './music/music.module';
     ConfigModule.forRoot(), // <- დაამატეთ ეს პირველად (აუცილებელია .env-ის ჩატვირთვისთვის)
     TypeOrmModule.forRoot({
       type: 'mysql', // ან postgres
-      host: 'localhost',
-      port: 3306,
+      host: 'maglev.proxy.rlwy.net',
+      port: 34758,
       username: 'root',
-      password: '',
-      database: 'miulai-backend-base',
+      password: 'OYNRPAkCfoUPOxPqlVpaOZBFTvPOmOLG',
+      database: 'railway',
       autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false, // Railway-ზე SSL-ისთვის
+      },
     }),
     AuthorModule,
     FilesModule,
