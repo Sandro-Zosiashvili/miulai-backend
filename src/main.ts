@@ -15,8 +15,20 @@ async function bootstrap() {
   //   credentials: true,
   // });
   app.enableCors({
-    origin: '*',
+    origin: true, // Reflects the request origin
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    exposedHeaders: ['Authorization', 'Set-Cookie'],
   });
 
   await app.listen(process.env.PORT ?? 3004);
