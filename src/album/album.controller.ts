@@ -8,13 +8,16 @@ import {
   Delete,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('album')
+@UseGuards(AuthGuard)
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 

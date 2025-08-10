@@ -3,10 +3,14 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UserRepository } from '../user/user.repository';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly repository: UserRepository) {}
+  constructor(
+    private readonly repository: UserRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async userLogin(data: CreateAuthDto) {
     const user = await this.repository.findByEmail(data.email);
@@ -20,6 +24,18 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect email or password');
     }
 
-    return user;
+    const payload = {
+      id: user.id,
+      email: user.email,
+    };
+    const jwtToken = await this.jwtService.signAsync(payload);
+
+    console.log('jwtToken', jwtToken);
+
+    return {
+      id: user.id,
+      email: user.email,
+      accessToken: jwtToken,
+    };
   }
 }
