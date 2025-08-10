@@ -23,6 +23,7 @@ export class UserRepository {
 
     const newUser = new User();
     newUser.email = createUserDto.email;
+    newUser.name = createUserDto.name;
     newUser.password = hash;
 
     return this.repository.save(newUser);
