@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
+import { Music } from '../../music/entities/music.entity';
 
 @Entity()
 export class Playlist {
@@ -26,6 +29,10 @@ export class Playlist {
 
   @ManyToOne(() => User, (user) => user.playlists)
   user: User;
+
+  @ManyToMany(() => Music, (music) => music.playlists)
+  @JoinTable()
+  musics: Music[];
 
   // @OneToMany(() => FileEntity, (file) => file.playlist)
   // files: FileEntity[];

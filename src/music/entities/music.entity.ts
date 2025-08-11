@@ -4,12 +4,14 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Album } from '../../album/entities/album.entity';
 import { Author } from '../../author/entities/author.entity';
+import { Playlist } from '../../playlists/entities/playlist.entity';
 
 @Entity()
 export class Music {
@@ -46,6 +48,9 @@ export class Music {
 
   @ManyToOne(() => Author, (author) => author.musics)
   author: Author;
+
+  @ManyToMany(() => Playlist, (playlist) => playlist.musics)
+  playlists: Playlist[];
 
   @Column({ nullable: true })
   duration: number;

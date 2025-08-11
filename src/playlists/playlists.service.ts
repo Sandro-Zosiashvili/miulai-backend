@@ -26,4 +26,8 @@ export class PlaylistsService {
   remove(id: number) {
     return this.playlistsRepo.remove(id);
   }
+
+  addMusicToPlaylist(playlistId: number, musicId: number) {
+    return this.playlistsRepo.addMusicToPlaylist(playlistId, musicId);
+  }
 }

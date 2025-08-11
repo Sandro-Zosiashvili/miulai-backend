@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
@@ -6,6 +14,14 @@ import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 @Controller('playlists')
 export class PlaylistsController {
   constructor(private readonly playlistsService: PlaylistsService) {}
+
+  @Post(':playlistId/music/:musicId')
+  addMusicToPlaylist(
+    @Param('playlistId') playlistId: number,
+    @Param('musicId') musicId: number,
+  ) {
+    return this.playlistsService.addMusicToPlaylist(playlistId, musicId);
+  }
 
   @Post()
   create(@Body() createPlaylistDto: CreatePlaylistDto) {
@@ -23,7 +39,10 @@ export class PlaylistsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlaylistDto: UpdatePlaylistDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePlaylistDto: UpdatePlaylistDto,
+  ) {
     return this.playlistsService.update(+id, updatePlaylistDto);
   }
 
