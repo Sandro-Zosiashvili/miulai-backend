@@ -15,18 +15,18 @@ import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // <- დაამატეთ ეს პირველად (აუცილებელია .env-ის ჩატვირთვისთვის)
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'mysql', // ან postgres
-      host: 'maglev.proxy.rlwy.net',
-      port: 34758,
-      username: 'root',
-      password: 'OYNRPAkCfoUPOxPqlVpaOZBFTvPOmOLG',
-      database: 'railway',
+      type: 'mysql',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       autoLoadEntities: true,
       synchronize: true,
       ssl: {
-        rejectUnauthorized: false, // Railway-ზე SSL-ისთვის
+        rejectUnauthorized: false,
       },
     }),
     AuthorModule,
