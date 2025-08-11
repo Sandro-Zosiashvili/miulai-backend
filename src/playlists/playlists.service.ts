@@ -15,7 +15,7 @@ export class PlaylistsService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} playlist`;
+    return this.playlistsRepo.findOne(id);
   }
 
   update(id: number, updatePlaylistDto: UpdatePlaylistDto) {

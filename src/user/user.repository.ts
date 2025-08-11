@@ -54,11 +54,7 @@ export class UserRepository {
   async findUserWithPlaylists(userId: number) {
     return this.repository
       .createQueryBuilder('user')
-      .select([
-        'user.id',
-        'user.name',
-        'user.email', // რა ველებიც გინდა
-      ])
+      .select(['user.id', 'user.name', 'user.email'])
       .leftJoinAndSelect('user.playlists', 'playlists')
       .where('user.id = :id', { id: userId })
       .getOne();
