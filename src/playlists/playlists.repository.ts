@@ -14,7 +14,7 @@ export class PlaylistsRepository {
     private readonly repository: Repository<Playlist>,
     @InjectRepository(Music)
     private readonly MusicRepository: Repository<Music>,
-    private readonly s3Service: S3Service, // ეს ვერ არის დაფარული DI-ში
+    private readonly s3Service: S3Service,
   ) {}
 
   create(createPlaylistDto: CreatePlaylistDto) {
@@ -37,8 +37,6 @@ export class PlaylistsRepository {
     if (!playlist) {
       throw new NotFoundException('Playlist not found');
     }
-
-    // Generate fresh presigned URLs for each music and album image
     if (playlist.musics && playlist.musics.length > 0) {
       playlist.musics = await Promise.all(
         playlist.musics.map(async (music) => {
@@ -46,8 +44,6 @@ export class PlaylistsRepository {
           if (music.imageKey) {
             music.music = await this.s3Service.getPresignedUrl(music.imageKey);
           }
-
-          // Generate presigned URL for the album image
           if (music.album?.imageKey) {
             music.album.albumImage = await this.s3Service.getPresignedUrl(
               music.album.imageKey,
