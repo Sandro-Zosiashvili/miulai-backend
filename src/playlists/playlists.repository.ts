@@ -29,4 +29,16 @@ export class PlaylistsRepository {
     }
     return playlists;
   }
+
+
+  async remove(id: number) {
+    const result = await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(Playlist)
+      .where('id = :id', { id })
+      .execute();
+
+    return result;
+  }
 }

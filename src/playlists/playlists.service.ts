@@ -6,6 +6,7 @@ import { PlaylistsRepository } from './playlists.repository';
 @Injectable()
 export class PlaylistsService {
   constructor(private readonly playlistsRepo: PlaylistsRepository) {}
+
   create(createPlaylistDto: CreatePlaylistDto) {
     return this.playlistsRepo.create(createPlaylistDto);
   }
@@ -23,6 +24,6 @@ export class PlaylistsService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} playlist`;
+    return this.playlistsRepo.remove(id);
   }
 }
