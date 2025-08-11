@@ -8,7 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
-  UploadedFiles,
+  UploadedFiles, UseGuards,
 } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
@@ -17,8 +17,9 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
+import { AuthGuard } from '../auth/auth.guard';
 
-
+@UseGuards(AuthGuard)
 @Controller('author')
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}

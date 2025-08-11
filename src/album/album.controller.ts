@@ -16,8 +16,8 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../auth/auth.guard';
 
-@Controller('album')
 @UseGuards(AuthGuard)
+@Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
