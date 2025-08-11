@@ -13,6 +13,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Controller('user')
 export class UserController {
@@ -26,8 +27,13 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get('me')
   getMe(@Req() req: Request) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return req['user'];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    const userId = req['user'].id;
+
+    if (!userId) {
+      throw new UnauthorizedException();
+    }
+    return this.userService.getMe(userId);
   }
 
   @Get()

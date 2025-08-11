@@ -29,11 +29,38 @@ export class UserRepository {
     return this.repository.save(newUser);
   }
 
+  async findOne(id: number) {
+    const user = await this.repository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, isAdmin, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
   async findByEmail(email: string): Promise<User> {
     const user = await this.repository.findOne({ where: { email: email } });
     if (!user) {
       throw new UnauthorizedException();
     }
     return user;
+  }
+
+  async findUserWithPlaylists(userId: number) {
+    return this.repository
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.name',
+        'user.email', // რა ველებიც გინდა
+      ])
+      .leftJoinAndSelect('user.playlists', 'playlists')
+      .where('user.id = :id', { id: userId })
+      .getOne();
   }
 }

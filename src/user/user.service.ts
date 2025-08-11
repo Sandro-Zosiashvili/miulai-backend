@@ -16,7 +16,11 @@ export class UserService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepo.findOne(id);
+  }
+
+  async getMe(userId: number) {
+    return this.userRepo.findUserWithPlaylists(userId);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
