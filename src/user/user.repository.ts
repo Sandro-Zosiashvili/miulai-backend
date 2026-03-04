@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -28,6 +28,19 @@ export class UserRepository {
 
     return this.repository.save(newUser);
   }
+
+  // async findAll() {
+  //   const users = await this.repository
+  //     .createQueryBuilder('user')
+  //     .leftJoinAndSelect('user.playlists', 'playlist')
+  //     .getMany();
+  //
+  //   if (!users.length) {
+  //     throw new NotFoundException('Users not found');
+  //   }
+  //
+  //   return users;
+  // }
 
   async findOne(id: number) {
     const user = await this.repository.findOne({
