@@ -26,8 +26,6 @@ export class AuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
-
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
