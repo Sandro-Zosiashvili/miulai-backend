@@ -22,7 +22,9 @@ export class MusicRepository {
     }
 
     const metadata = await mm.parseBuffer(file.buffer);
-    const duration = metadata.format.duration ?? 0;
+    // duration is an integer column, but music-metadata returns seconds as a
+    // float — round to whole seconds so the insert doesn't fail.
+    const duration = Math.round(metadata.format.duration ?? 0);
 
     const newMusic = this.repository.create({
       ...createMusicDto,
