@@ -1,46 +1,67 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import * as AWS from 'aws-sdk';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class S3Service {
-  private s3: AWS.S3;
+  private s3: S3Client;
+  private bucket: string;
+  private endpoint?: string;
 
   constructor() {
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: 'eu-north-1',
-      signatureVersion: 'v4',
+    this.endpoint = process.env.AWS_ENDPOINT_URL_S3;
+    this.bucket = String(process.env.S3_BUCKET);
+    this.s3 = new S3Client({
+      region: process.env.AWS_REGION || 'auto',
+      endpoint: this.endpoint,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: String(process.env.AWS_ACCESS_KEY_ID),
+        secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY),
+      },
     });
   }
 
   async upload(file: Express.Multer.File) {
-    const params = {
-      Bucket: String(process.env.BUCKET_NAME),
-      Key: String(file.originalname),
-      Body: file.buffer,
-      ContentType: file.mimetype,
-      ContentDisposition: 'inline',
-      CreateBucketConfiguration: {
-        LocationConstraint: 'eu-north-1',
-      },
-    };
-
+    const key = String(file.originalname);
     try {
-      return await this.s3.upload(params).promise();
+      await this.s3.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+          ContentDisposition: 'inline',
+        }),
+      );
+
+      const base = (this.endpoint || '').replace(/\/$/, '');
+      const location = base
+        ? `${base}/${this.bucket}/${encodeURIComponent(key)}`
+        : key;
+
+      return {
+        Location: location,
+        Key: key,
+        Bucket: this.bucket,
+      };
     } catch {
       throw new HttpException('Failed to upload file to S3', 500);
     }
   }
 
   async getPresignedUrl(key: string) {
-    const params = {
-      Bucket: String(process.env.BUCKET_NAME),
-      Key: key,
-      Expires: 3600,
-    };
     try {
-      return await this.s3.getSignedUrlPromise('getObject', params);
+      return await getSignedUrl(
+        this.s3,
+        new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+        { expiresIn: 3600 },
+      );
     } catch {
       throw new HttpException('Failed to generate presigned URL', 500);
     }
@@ -48,12 +69,9 @@ export class S3Service {
 
   async deleteFile(key: string): Promise<boolean> {
     try {
-      await this.s3
-        .deleteObject({
-          Bucket: String(process.env.BUCKET_NAME),
-          Key: key,
-        })
-        .promise();
+      await this.s3.send(
+        new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
       return true;
     } catch (error) {
       return false;
