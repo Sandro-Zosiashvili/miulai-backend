@@ -29,18 +29,11 @@ export class UserRepository {
     return this.repository.save(newUser);
   }
 
-  // async findAll() {
-  //   const users = await this.repository
-  //     .createQueryBuilder('user')
-  //     .leftJoinAndSelect('user.playlists', 'playlist')
-  //     .getMany();
-  //
-  //   if (!users.length) {
-  //     throw new NotFoundException('Users not found');
-  //   }
-  //
-  //   return users;
-  // }
+  async findAll() {
+    const users = await this.repository.find();
+    // Return the list without exposing password hashes.
+    return users.map(({ password, ...rest }) => rest);
+  }
 
   async findOne(id: number) {
     const user = await this.repository.findOne({

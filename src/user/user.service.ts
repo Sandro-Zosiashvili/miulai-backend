@@ -12,7 +12,7 @@ export class UserService {
   }
 
   findAll() {
-    return 'hi';
+    return this.userRepo.findAll();
   }
 
   findOne(id: number) {
