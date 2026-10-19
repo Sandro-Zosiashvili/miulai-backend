@@ -47,9 +47,15 @@ export default async function handler(
   req: express.Request,
   res: express.Response,
 ) {
-  if (!bootstrapPromise) {
-    bootstrapPromise = bootstrap();
+  try {
+    if (!bootstrapPromise) {
+      bootstrapPromise = bootstrap();
+    }
+    await bootstrapPromise;
+  } catch (err) {
+    // Don't cache a failed bootstrap: let the next invocation retry.
+    bootstrapPromise = undefined;
+    throw err;
   }
-  await bootstrapPromise;
   expressApp(req, res);
 }
