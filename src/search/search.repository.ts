@@ -22,18 +22,21 @@ export class SearchRepository {
     // Search in Music
     const musicResults = await this.musicRepository
       .createQueryBuilder('music')
-      .where('music.name LIKE :searchTerm', { searchTerm: `%${searchTerm}%` })
       .leftJoinAndSelect('music.author', 'author')
       .leftJoinAndSelect('music.album', 'album')
+      .where('music.name ILIKE :searchTerm', { searchTerm: `%${searchTerm}%` })
+      .orWhere('music.artistName ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      })
       .getMany();
 
     // Search in Authors
     const authorResults = await this.authorRepository
       .createQueryBuilder('author')
-      .where('author.artistName LIKE :searchTerm', {
+      .where('author.artistName ILIKE :searchTerm', {
         searchTerm: `%${searchTerm}%`,
       })
-      .orWhere('author.artistBiography LIKE :searchTerm', {
+      .orWhere('author.artistBiography ILIKE :searchTerm', {
         searchTerm: `%${searchTerm}%`,
       })
       .getMany();
@@ -41,10 +44,13 @@ export class SearchRepository {
     // Search in Albums
     const albumResults = await this.albumRepository
       .createQueryBuilder('album')
-      .where('album.albumName LIKE :searchTerm', {
+      .leftJoinAndSelect('album.author', 'author')
+      .where('album.albumName ILIKE :searchTerm', {
         searchTerm: `%${searchTerm}%`,
       })
-      .leftJoinAndSelect('album.author', 'author')
+      .orWhere('album.artistName ILIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      })
       .getMany();
 
     // Process results (add S3 URLs if needed)
@@ -54,7 +60,7 @@ export class SearchRepository {
           music.music = await this.s3service.getPresignedUrl(music.imageKey);
         }
 
-        if (music.album.imageKey) {
+        if (music.album?.imageKey) {
           music.album.albumImage = await this.s3service.getPresignedUrl(
             music.album.imageKey,
           );
